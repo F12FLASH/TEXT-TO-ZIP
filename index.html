@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to ZIP Compressor</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #74ebd5, #9face6);
+            color: #333;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        textarea {
+            width: 80%;
+            height: 150px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            resize: none;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #ff7f50;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #e06643;
+            transform: translateY(-2px);
+        }
+
+        .progress {
+            width: 80%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: #28a745;
+            transition: width 0.4s;
+        }
+
+        .download {
+            margin-top: 20px;
+            display: none;
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            background-color: #007bff;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .download:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text to ZIP Compressor</h1>
+    <textarea id="textInput" placeholder="Enter your text here..."></textarea>
+    <button id="compressButton">Compress</button>
+
+    <div class="progress" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <a id="downloadLink" class="download">Download ZIP</a>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js"></script>
+    <script>
+        document.getElementById('compressButton').addEventListener('click', function() {
+            const textInput = document.getElementById('textInput').value;
+
+            if (!textInput.trim()) {
+                alert('Please enter some text to compress.');
+                return;
+            }
+
+            const fileName = prompt('Enter the name of the ZIP file (without extension):', 'text');
+            if (!fileName) {
+                alert('File name is required to proceed.');
+                return;
+            }
+
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const downloadLink = document.getElementById('downloadLink');
+
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            const zip = new JSZip();
+            zip.file('text.txt', textInput);
+
+            const updateProgress = (percent) => {
+                progressBar.style.width = percent + '%';
+            };
+
+            zip.generateAsync({ type: 'blob' }, (metadata) => {
+                updateProgress(metadata.percent);
+            }).then((content) => {
+                const blobURL = URL.createObjectURL(content);
+                downloadLink.href = blobURL;
+                downloadLink.download = `${fileName}.zip`;
+                downloadLink.style.display = 'block';
+                progressContainer.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
